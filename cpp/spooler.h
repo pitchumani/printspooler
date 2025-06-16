@@ -36,27 +36,15 @@ public:
 class Spooler {
 private:
     std::vector<Printer> printers;
+    std::vector<PrintJob> printJobs;
+    // make the constructor private to make it Singleton
+    Spooler() {}
+    static Spooler *printSpooler;
 public:
-    Spooler() {
-        // Initialize the spooler with available printers
-        // This could be replaced with actual printer discovery logic
-    }
-    void addPrinter(const Printer& printer) {
-        printers.push_back(printer);
-    }
-    void removePrinter(const std::string& printerName) {
-        printers.erase(std::remove_if(printers.begin(), printers.end(),
-                                       [&printerName](const Printer& p) { return p.getName() == printerName; }),
-                       printers.end());
-    }
-    bool addToPrintQueue(const std::string& document, const std::string& printerName) {
-        for (auto& printer : printers) {
-            if (printer.getName() == printerName) {
-                return printer.addToQueue(document);
-            }
-        }
-        return false; // Printer not found
-    }
+    Spooler *getInstance();
+    void addPrinter(const std::string& name);
+    void removePrinter(const std::string& printerName);
+    bool addToPrintQueue(const std::string& document, const std::string& printerName);
 };
 
 #endif // SPOOLER_H

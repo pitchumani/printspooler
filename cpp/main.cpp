@@ -4,6 +4,7 @@
 
 #include "database.h"
 #include "options.h"
+#include "spooler.h"
 
 int main(int argc, char* argv[]) {
     auto options = getOptions();
@@ -16,6 +17,8 @@ int main(int argc, char* argv[]) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
+
+    // TODO: move dbhandling and print jobs to spooler functions
 
     if (options.status) {
         std::cout << "Status of print jobs:" << std::endl;
