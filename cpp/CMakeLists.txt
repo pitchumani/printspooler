@@ -9,8 +9,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(SOURCES
     main.cpp
     database.cpp
-    spooler.cpp
     options.cpp
+    printer.cpp
+    spooler.cpp
 )
 
 add_executable(printspooler ${SOURCES})

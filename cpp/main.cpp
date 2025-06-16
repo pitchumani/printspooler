@@ -1,9 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <thread>
 
 #include "database.h"
 #include "options.h"
+#include "printer.h"
 #include "spooler.h"
 
 int main(int argc, char* argv[]) {
@@ -19,7 +21,11 @@ int main(int argc, char* argv[]) {
     }
 
     // TODO: move dbhandling and print jobs to spooler functions
+    // User - producer of PrintJob objects and add it to the queue in the Spooler
+    // Printer - consumer of PrintJob objects, takes the jobs from queue in the Spooler
 
+    Spooler *printSpooler = Spooler::getInstance();
+    Printer printer1("Printer1");
     if (options.status) {
         std::cout << "Status of print jobs:" << std::endl;
         std::cout << "  - To be implemented: Job status details." << std::endl;
@@ -40,13 +46,19 @@ int main(int argc, char* argv[]) {
             dbHandler->addPrinter(p);
         }
     }
+    auto printFunc = [&printer1]() {
+        std::cout << "Starting print thread!\n";
+        printer1.print();
+    };
+    std::thread printThread(printFunc);
     if (options.print) {
         std::cout << "Printing documents:" << std::endl;
         for (const auto& doc : options.printDocuments) {
-            std::cout << "  - adding " << doc << " to print queue." << std::endl;
+            printSpooler->addJob(PrintJob(doc));
             // TODO: Implement actual printing logic
             // Check if the document exists, is accessible, etc.
         }
     }
+    printThread.join();
     return 0;
 }

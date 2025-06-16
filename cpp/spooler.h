@@ -3,48 +3,30 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 
-class PrintJob {
-    int id;
-    std::string fileName;
-    enum class STATUS { NONE, DONE, INPROGRESS, WAITING };
-    STATUS status;
-public:
-    PrintJob(const std::string &filename) : fileName(filename) {}
-};
+#include "job.h"
 
-class Printer {
-private:
-    int id;
-    std::string name;
-    std::vector<PrintJob> printQueue;
-public:
-    Printer(const std::string& name) : name(name) {}
-    Printer(const int id, const std::string &name) : id(id), name(name) {}
-
-    const std::string& getName() const {
-        return name;
-    }
-
-    bool addToQueue(const std::string& document) {
-        // Here we would normally check if the document exists and is accessible
-        printQueue.push_back(PrintJob(document));
-        return true; // Assume the job was added successfully
-    }
-};
+// forware declaration
+class Printer;
 
 class Spooler {
 private:
-    std::vector<Printer> printers;
-    std::vector<PrintJob> printJobs;
+    std::vector<Printer*> printers;
     // make the constructor private to make it Singleton
     Spooler() {}
     static Spooler *printSpooler;
+    
 public:
-    Spooler *getInstance();
+    // mutex to control the concurrent access to the print jobs
+    std::mutex mtx;
+    std::condition_variable cond;
+    std::queue<PrintJob> printJobs;
+
+    static Spooler *getInstance();
     void addPrinter(const std::string& name);
     void removePrinter(const std::string& printerName);
-    bool addToPrintQueue(const std::string& document, const std::string& printerName);
+    void addJob(const PrintJob& job);
 };
 
 #endif // SPOOLER_H
