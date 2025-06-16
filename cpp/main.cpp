@@ -2,16 +2,21 @@
 #include <vector>
 #include <string>
 
+#include "database.h"
 #include "options.h"
 
 int main(int argc, char* argv[]) {
-    Options options(argc, argv);
+    auto options = getOptions();
+    if (!options.handleArgs(argc, argv)) return 1;
 
-    bool status = options.handleArgs();
-    if (!status) {
+    DatabaseHandler *dbHandler = nullptr;
+    try {
+        dbHandler = DatabaseHandler::Get();
+    } catch (const std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
         return 1;
     }
-    
+
     if (options.status) {
         std::cout << "Status of print jobs:" << std::endl;
         std::cout << "  - To be implemented: Job status details." << std::endl;
@@ -23,6 +28,13 @@ int main(int argc, char* argv[]) {
             std::cout << "Listing all print jobs:" << std::endl;
         } else if (options.listType == Options::ListType::Printers) {
             std::cout << "Listing all printers:" << std::endl;
+            auto printers = dbHandler->getPrinters();
+        }
+    }
+    if (options.addPrinter) {
+        std::cout << "Adding a printer" << std::endl;
+        for (auto &p : options.printersToAdd) {
+            dbHandler->addPrinter(p);
         }
     }
     if (options.print) {
