@@ -9,9 +9,11 @@
 class Options {
 private:
     std::vector<std::string> args;
-public:
     Options() {}
+    static Options *instance;
 
+public:
+    static Options* Get();
     bool print = false;
     std::vector<std::string> printDocuments;
     bool cancel = false;
@@ -26,7 +28,5 @@ public:
     bool handleArgs(int argc, char *argv[]);
     void printUsage() const;
 };
-
-extern Options &getOptions();
 
 #endif // OPTIONS_H

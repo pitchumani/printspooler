@@ -1,8 +1,12 @@
 #include "options.h"
 
-Options& getOptions() {
-    static Options optHandler;
-    return optHandler;
+Options* Options::instance = nullptr;
+
+Options* Options::Get() {
+    if (!instance) {
+        instance = new Options();
+    }
+    return instance;
 }
 
 bool Options::handleArgs(int argc, char *argv[]) {

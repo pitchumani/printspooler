@@ -16,7 +16,7 @@ private:
     // make the constructor private to make it Singleton
     Spooler() {}
     static Spooler *printSpooler;
-    
+
 public:
     // mutex to control the concurrent access to the print jobs
     std::mutex mtx;

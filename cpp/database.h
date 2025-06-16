@@ -24,11 +24,22 @@ struct PrintJobData {
 // FIXME: make this class as singleton
 class DatabaseHandler {
     sqlite3 *db = nullptr;
+    // private constructor to make the handler singleton
     DatabaseHandler(sqlite3 *db) : db(db) {}
+    // no copy, assignment constructors
+    DatabaseHandler(const DatabaseHandler&) = delete;
+    DatabaseHandler& operator=(const DatabaseHandler&) = delete;
+
     ~DatabaseHandler() {
-        sqlite3_close(db);
+        if (db) {
+            sqlite3_close(db);
+            db = nullptr;
+        }
     }
     bool initialize();
+
+    static DatabaseHandler *instance;
+
 public:
     // "print_spooler.db"
     static std::string dbFilename;

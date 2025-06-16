@@ -5,6 +5,8 @@
 #include <vector>
 #include <mutex>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "job.h"
 #include "options.h"
@@ -16,13 +18,13 @@ private:
     std::string name;
     Spooler *spooler = nullptr;
     bool verbose = false;
+    std::atomic<bool> stopFlag;
+
 public:
-    Printer(const std::string& name) : name(name) {
-        spooler = Spooler::getInstance();
-        verbose = getOptions().verbose;
-    }
+    Printer(const std::string& name);
     const std::string& getName() { return name; }
     void print();
+    void stop();
 };
 
 #endif // PRINTER_H

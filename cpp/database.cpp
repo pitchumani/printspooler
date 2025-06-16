@@ -2,28 +2,29 @@
 
 #include "options.h"
 
+DatabaseHandler* DatabaseHandler::instance = nullptr;
+
 // initialize the dbfilename static member
 std::string DatabaseHandler::dbFilename = "print_spooler.db";
 
 DatabaseHandler* DatabaseHandler::Get() {
-    static DatabaseHandler *dbHandler = nullptr;
-    static sqlite3 *db = nullptr;
-    if (!db) {
+    // create instance if not exists
+    if (!instance) {
+        sqlite3 *db = nullptr;
         int ret = sqlite3_open(DatabaseHandler::dbFilename.c_str(), &db);
         if (ret) {
             std::stringstream ss;
             ss << "Can't open database: " << sqlite3_errmsg(db);
+            if (db) sqlite3_close(db);
             throw std::runtime_error(ss.str());
         }
-        if (getOptions().verbose)
+        if (Options::Get()->verbose)
             std::cout << "Opened the database successfully!" << std::endl;
+
+        instance = new DatabaseHandler(db);
+        instance->initialize();
     }
-    if (!dbHandler) {
-        dbHandler = new DatabaseHandler(db);
-        // create required tables if not present already
-        dbHandler->initialize();
-    }
-    return dbHandler;
+    return instance;
 }
 
 // A callback function for SQLite to execute for each row of a result set
@@ -85,7 +86,7 @@ bool DatabaseHandler::addPrinter(std::string name) {
         throw std::runtime_error(ss.str());
         return false;
     } else {
-        if (getOptions().verbose)
+        if (Options::Get()->verbose)
             std::cout << "Records inserted successfully" << std::endl;
     }
     return true;
@@ -102,7 +103,7 @@ std::vector<PrinterData> DatabaseHandler::getPrinters() {
     if (rc != SQLITE_OK) {
         std::stringstream ss;
         ss << "SQL error: " << zErrMsg;
-        throw std::runtime_error(ss.str());        
+        throw std::runtime_error(ss.str());
     } else {
         std::cout << "DB Retrieval info:\n";
         for (const auto& printer : printers) {
@@ -149,7 +150,7 @@ bool DatabaseHandler::initialize() {
         ss << "SQLError: " << errMsg;
         throw std::runtime_error(ss.str());
     } else {
-        if (getOptions().verbose)
+        if (Options::Get()->verbose)
             std::cout << "PRINTERS table created successfully or already exists" << std::endl;
     }
 
@@ -162,10 +163,10 @@ bool DatabaseHandler::initialize() {
     int ret2 = sqlite3_exec(db, sqlCreateTablePrintJobs, callbackPrintJobs, 0, &errMsg2);
     if (ret2 != SQLITE_OK) {
         std::stringstream ss;
-        ss << "SQLError: " << errMsg2;        
+        ss << "SQLError: " << errMsg2;
         throw std::runtime_error(ss.str());
     } else {
-        if (getOptions().verbose)
+        if (Options::Get()->verbose)
             std::cout << "Table created successfully or already exists" << std::endl;
     }
 

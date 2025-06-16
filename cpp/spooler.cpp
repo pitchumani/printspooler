@@ -25,7 +25,8 @@ void Spooler::addJob(const PrintJob &job) {
     printJobs.push(job);
     lock.unlock();
     cond.notify_one();
-    if (getOptions().verbose) {
+    if (Options::Get()->verbose) {
         std::cout << "- Added print job (doc: " << job.filename << ")" << std::endl;
     }
 }
+
